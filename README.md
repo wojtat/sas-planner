@@ -7,6 +7,8 @@ Author: *Vojtěch Tilhon*, e-mail: *vojtech.tilhon@seznam.cz*
 This project was implemented for the PUI (Planning for Artificial Intelligence) course at FEE CTU.
 No guarantees about the functionality of the code are given.
 
+The `data/` directory contains 3 example SAS tasks which can be used.
+
 The `planner.py` Python script takes an FDR task as a SAS file
 and finds an optimal plan using the A* algorithm and the $h_{\max}$ or the LM-cut heuristic.
 The found path is printed to the standard output.
