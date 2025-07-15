@@ -1,7 +1,6 @@
 #!/bin/env python
-
-import sys
-import numpy as np
+import argparse
+from argparse import ArgumentParser
 
 import hmax
 from sas import SasParser, fdr_to_strips_plus
@@ -131,7 +130,8 @@ def compute_h_lm_cut(
     return h_lm_cut
 
 
-def main(input_file):
+def main(args: argparse.Namespace):
+    input_file = args.input
     parser = SasParser(input_file)
     num_variables, initial_values, goal_state, actions = parser.parse()
     facts, actions, s0, g, pre_to_actions = fdr_to_strips_plus(actions, initial_values, goal_state)
@@ -141,4 +141,12 @@ def main(input_file):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    parser = ArgumentParser(
+        description='Compute and print the LM-cut heuristic value of the initial state'
+    )
+    parser.add_argument(
+        '--input', '-i', type=str,
+        help='Path to a file containing the SAS representation of the task',
+        required=True
+    )
+    main(parser.parse_args())
