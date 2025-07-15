@@ -74,31 +74,16 @@ def _compute_gamma_fixed_point(
         facts,
         actions,
         s,
-        g,
-        compute_fully,
+        _g,
+        _compute_fully,
         pre_to_actions
 ):
     fact_to_index = {f: i for i, f in enumerate(facts)}
-
-    # Precompute actions
-    # actions_pre = np.zeros((len(actions), len(facts)), dtype=np.bool_)
-    # actions_add = np.zeros((len(actions), len(facts)), dtype=np.bool_)
-    # actions_costs = np.zeros(len(actions), dtype=np.int32)
-    # for i, (pre, add, cost) in enumerate(actions):
-    #     for p in pre:
-    #         actions_pre[i, fact_to_index[p]] = True
-    #     for p in add:
-    #         actions_add[i, fact_to_index[p]] = True
-    #     actions_costs[i] = cost
 
     sigma = np.empty(len(facts))
     sigma[:] = np.inf
     for p in s:
         sigma[fact_to_index[p]] = 0
-
-    # sigma = {p: float('inf') for p in facts}
-    # for p in s:
-    #     sigma[p] = 0
 
     num_finished_actions = 0
     counter = [len(pre) for pre, add, cost in actions]
@@ -114,17 +99,8 @@ def _compute_gamma_fixed_point(
     finished = np.zeros(len(facts), dtype=np.bool_)
     num_finished = 0
 
-    #while num_finished != len(facts) if compute_fully else not g.issubset(finished):
     while num_finished != len(facts) and num_finished_actions != len(actions):
         cheapest_fact_i = np.argmin(np.where(finished, np.inf, sigma))
-        # cheapest_cost = float('inf')
-        # for fact_i, cost in enumerate(sigma):
-        #     if fact_i in finished:
-        #         continue
-        #
-        #     if cheapest_cost == float('inf') or cost < cheapest_cost:
-        #         cheapest_cost = cost
-        #         cheapest_fact_i = fact_i
         cheapest_cost = sigma[cheapest_fact_i]
 
         if cheapest_cost == float('inf'):
@@ -134,15 +110,11 @@ def _compute_gamma_fixed_point(
         num_finished += 1
         cheapest_fact = facts[cheapest_fact_i]
 
-        # for i, (pre, add, cost) in enumerate(actions):
         for i in pre_to_actions[cheapest_fact]:
             pre, add, cost = actions[i]
-            # if cheapest_fact not in pre:
-            #     continue
 
             counter[i] -= 1
             if counter[i] == 0:
-                #num_finished_actions += 1
                 for p in add:
                     p_i = fact_to_index[p]
                     v = cost + cheapest_cost
