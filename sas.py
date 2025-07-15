@@ -1,10 +1,20 @@
-
 class SasParser:
+    """
+    The SAS file representation parser
+    """
     def __init__(self, sas_file_name):
+        """
+        Initialize a new SAS parser with the contents of the provided file.
+        :param sas_file_name: path to the file containing the SAS problem
+        """
         with open(sas_file_name, 'rt') as f:
             self.lines = list(f)
 
     def _eat_line(self):
+        """
+        Consume a line from the loaded lines.
+        :return: the consumed line, or empty string if there are no lines left
+        """
         if self.lines:
             line = self.lines[0].strip()
             self.lines = self.lines[1:]
@@ -13,6 +23,10 @@ class SasParser:
             return ''
 
     def _parse_header(self):
+        """
+        Parse the initial SAS file header.
+        :return: the version number and a flag indicating whether action costs are used
+        """
         assert self._eat_line() == 'begin_version'
         version_number = int(self._eat_line())
         assert self._eat_line() == 'end_version'
@@ -22,6 +36,10 @@ class SasParser:
         return version_number, uses_action_costs
 
     def _parse_variables(self):
+        """
+        Parse the variables section.
+        :return: the number of variables
+        """
         num_variables = int(self._eat_line())
         for var_index in range(num_variables):
             assert self._eat_line() == 'begin_variable'
@@ -34,6 +52,9 @@ class SasParser:
         return num_variables
 
     def _parse_mutex_groups(self):
+        """
+        Parse the mutex groups section.
+        """
         num_mutex_groups = int(self._eat_line())
         for i in range(num_mutex_groups):
             assert self._eat_line() == 'begin_mutex_group'
@@ -43,6 +64,11 @@ class SasParser:
             assert self._eat_line() == 'end_mutex_group'
 
     def _parse_initial_state(self, num_variables):
+        """
+        Parse the initial state section.
+        :param num_variables: the number of variables in the problem
+        :return: a list containing the initial value for each variable
+        """
         initial_values = []
         assert self._eat_line() == 'begin_state'
         for i in range(num_variables):
@@ -51,6 +77,10 @@ class SasParser:
         return initial_values
 
     def _parse_goal_state(self):
+        """
+        Parse the goal state section.
+        :return: a list containing the assignments to variables in the goal state
+        """
         assert self._eat_line() == 'begin_goal'
         num_assignments = int(self._eat_line())
         assignments = []
@@ -63,6 +93,10 @@ class SasParser:
         return assignments
 
     def _parse_actions(self):
+        """
+        Parse the operators section.
+        :return: a list containing the action name, cost, prevailing variables and effect variables tuple.
+        """
         num_actions = int(self._eat_line())
         actions = []
         for i in range(num_actions):
@@ -92,6 +126,10 @@ class SasParser:
         return actions
 
     def parse(self):
+        """
+        Parse the whole file.
+        :return: the number of variables, the initial state, goal state and the list of actions
+        """
         version_number, uses_action_costs = self._parse_header()
         assert version_number == 3
         num_variables = self._parse_variables()
@@ -107,6 +145,13 @@ def fdr_to_strips_plus(
         initial_state,
         goal_state
 ):
+    """
+    Convert the original FDR task into a STRIPS task with actions' delete effects removed.
+    :param actions: the FDR actions
+    :param initial_state: the FDR initial state
+    :param goal_state: the FDR goal state
+    :return:
+    """
     strips_initial_state = set(enumerate(initial_state))
     strips_goal_state = set(goal_state)
 
