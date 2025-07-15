@@ -1,7 +1,8 @@
 #!/bin/env python
+import argparse
+from argparse import ArgumentParser
+from enum import Enum
 
-import sys
-import numpy as np
 from sas import SasParser, fdr_to_strips_plus
 from hmax import compute_h_max
 from lmcut import compute_h_lm_cut
@@ -137,7 +138,6 @@ class SuccessorGenerator:
             domains[var].add(value)
         domains = [max(domain) + 1 for domain in domains]
         self.root = generate_children(0, domains, actions, list(range(len(actions))))
-        #print_node(self.root)
 
     def get_applicable(self, state):
         applicable = get_applicable_from_tree(self.root, state)
@@ -151,7 +151,14 @@ class SuccessorGenerator:
         return applicable_actions
 
 
-def main(input_file_name, heuristic):
+class HeuristicName(str, Enum):
+    HMAX = 'hmax'
+    LMCUT = 'lmcut'
+
+
+def main(args: argparse.Namespace):
+    input_file_name = args.input
+    heuristic_name = args.heuristic.value
     parser = SasParser(input_file_name)
     num_variables, initial_values, goal_state, actions = parser.parse()
     facts, str_actions, str_initial_state, str_goal_state, pre_to_actions = fdr_to_strips_plus(
@@ -179,12 +186,12 @@ def main(input_file_name, heuristic):
         h_lmcut = compute_h_lm_cut(facts, str_actions, s, str_goal_state, pre_to_actions)
         return h_lmcut
 
-    if heuristic == 'hmax':
+    if heuristic_name == HeuristicName.HMAX:
         path, total_cost = a_star(tuple(initial_values), is_goal, get_applicable, h_max_heuristic)
-    elif heuristic == 'lmcut':
+    elif heuristic_name == HeuristicName.LMCUT:
         path, total_cost = a_star(tuple(initial_values), is_goal, get_applicable, h_lm_cut_heuristic)
     else:
-        raise ValueError(f'{heuristic} heuristic not recognised')
+        assert False, 'unreachable'
 
     for action in path:
         print(action)
@@ -193,4 +200,16 @@ def main(input_file_name, heuristic):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1], sys.argv[2])
+    parser = ArgumentParser()
+    parser.add_argument(
+        '--input', '-i', type=str,
+        help='Path to a file containing the SAS representation of the task',
+        required=True
+    )
+    parser.add_argument(
+        '--heuristic', type=HeuristicName,
+        choices=[heuristic_name.value for heuristic_name in HeuristicName],
+        help='The type of heuristic to use',
+        required=True
+    )
+    main(parser.parse_args())
