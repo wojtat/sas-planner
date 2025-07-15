@@ -135,15 +135,6 @@ def get_applicable_from_tree(node, state):
         return node.generated_operators
 
 
-def print_node(node):
-    if isinstance(node, SelectorNode):
-        print(node.selection_variable, len(node.children))
-        for child in node.children:
-            print_node(child)
-    elif isinstance(node, GeneratorNode):
-        print(node.generated_operators)
-
-
 class SuccessorGenerator:
     def __init__(self, num_variables, facts, actions):
         self.actions = actions
