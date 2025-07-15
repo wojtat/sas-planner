@@ -205,7 +205,9 @@ def main(args: argparse.Namespace):
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
+    parser = ArgumentParser(
+        description='Plan an optimal path from the initial state to a goal state using A* and a heuristic'
+    )
     parser.add_argument(
         '--input', '-i', type=str,
         help='Path to a file containing the SAS representation of the task',
