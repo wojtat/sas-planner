@@ -10,6 +10,12 @@ from dataclasses import dataclass
 
 
 def get_path(parent, goal_state):
+    """
+    Reconstructs the path from the initial state to the goal.
+    :param parent: a dict where the key is a state and value is the parent, action, cost tuple
+    :param goal_state: the goal state
+    :return: the reconstructed path from the initial state to the goal and the cost of the plan
+    """
     actions = []
     total_cost = 0
     state = goal_state
@@ -22,6 +28,14 @@ def get_path(parent, goal_state):
 
 
 def a_star(s0, is_goal, get_applicable, h):
+    """
+    An implementation of the classic A* search algorithm.
+    :param s0: the initial state
+    :param is_goal: a function returning true only if the given state is goal
+    :param get_applicable: a function returning all applicable actions and neighbors in the given state
+    :param h: a heuristic function returning a float indicating the estimated distance to goal from the given state
+    :return: the found path from the initial state to the goal state and its cost
+    """
     parent = {}
     g = {s0: 0}
     open_list = [(s0, h(s0))]
